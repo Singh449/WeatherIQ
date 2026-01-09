@@ -1,0 +1,607 @@
+/* pulling fonts from Google so i don’t need to host font files */
+@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Unbounded:wght@400;600&display=swap");
+
+/* 
+  theme variables live here.
+  if i want a new color palette / vibe, i mostly change these vars.
+*/
+:root {
+  --ink: #10101a; /* used for contrast text on bright buttons */
+  --storm: #0f1629; /* unused right now but kept as a “brand” dark */
+  --mist: rgba(255, 255, 255, 0.12); /* light overlay tone */
+  --glass: rgba(18, 24, 44, 0.68); /* glassy card background */
+  --edge: rgba(255, 255, 255, 0.12); /* soft border line */
+  --shadow: 0 30px 80px rgba(7, 12, 26, 0.45); /* heavy shadow */
+  --shadow-soft: 0 16px 40px rgba(9, 14, 28, 0.3); /* lighter shadow */
+  --bg: radial-gradient(circle at top, #2c3e66, #111827 65%); /* page background */
+  --text: #f2f5ff; /* main text color */
+  --text-muted: rgba(242, 245, 255, 0.78); /* secondary text */
+  --text-soft: rgba(242, 245, 255, 0.62); /* softer helper text */
+  --text-faint: rgba(242, 245, 255, 0.5); /* labels + low-priority text */
+  --panel: rgba(16, 22, 40, 0.6); /* search panel background */
+  --panel-border: rgba(255, 255, 255, 0.16); /* panel border */
+  --panel-focus: rgba(255, 255, 255, 0.35); /* focus ring color */
+  --card: linear-gradient(160deg, rgba(22, 30, 54, 0.92), rgba(16, 22, 40, 0.8)); /* main card look */
+  --card-border: rgba(255, 255, 255, 0.12); /* card outline */
+  --card-muted: rgba(16, 22, 40, 0.72); /* muted card for forecast cards */
+  --chip: rgba(255, 255, 255, 0.08); /* small pill buttons / chips */
+  --chip-border: rgba(255, 255, 255, 0.16); /* chip outline */
+  --mood-bg: rgba(255, 255, 255, 0.08); /* mood badge background */
+  --mood-border: rgba(255, 255, 255, 0.16); /* mood badge outline */
+  --highlight: rgba(255, 255, 255, 0.14); /* little highlight behind text tags */
+  --input-placeholder: rgba(242, 245, 255, 0.55); /* placeholder text */
+  --accent: #9ac2ff; /* main accent color */
+  --accent-strong: #6fa0ff; /* deeper accent for gradients */
+}
+
+/* basic reset so spacing is consistent across browsers */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* global body styling */
+body {
+  font-family: "Space Grotesk", system-ui, sans-serif;
+  color: var(--text);
+  background: var(--bg);
+  min-height: 100vh;
+  overflow-x: hidden; /* prevents weird horizontal scroll from glow shapes */
+}
+
+/* 
+  light theme is just variable overrides.
+  i do it this way so i don’t duplicate the whole CSS.
+*/
+body[data-theme="light"] {
+  --bg: radial-gradient(circle at top, #f1f4ff, #d8e2ff 70%);
+  --text: #121628;
+  --text-muted: rgba(18, 22, 40, 0.72);
+  --text-soft: rgba(18, 22, 40, 0.6);
+  --text-faint: rgba(18, 22, 40, 0.45);
+  --glass: rgba(255, 255, 255, 0.75);
+  --edge: rgba(130, 150, 210, 0.25);
+  --shadow: 0 30px 80px rgba(70, 86, 132, 0.18);
+  --shadow-soft: 0 16px 40px rgba(70, 86, 132, 0.12);
+  --panel: rgba(255, 255, 255, 0.75);
+  --panel-border: rgba(130, 150, 210, 0.25);
+  --panel-focus: rgba(130, 150, 210, 0.5);
+  --card: linear-gradient(165deg, rgba(255, 255, 255, 0.95), rgba(236, 242, 255, 0.88));
+  --card-border: rgba(130, 150, 210, 0.2);
+  --card-muted: rgba(255, 255, 255, 0.8);
+  --chip: rgba(255, 255, 255, 0.7);
+  --chip-border: rgba(130, 150, 210, 0.25);
+  --mood-bg: rgba(255, 255, 255, 0.7);
+  --mood-border: rgba(130, 150, 210, 0.25);
+  --highlight: rgba(18, 22, 40, 0.08);
+  --input-placeholder: rgba(18, 22, 40, 0.4);
+  --accent: #4b6fd8;
+  --accent-strong: #3559c9;
+}
+
+/* background container (doesn’t affect layout) */
+.sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  overflow: hidden;
+}
+
+/* orb base style (each orb customizes size/position below) */
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(4px); /* glow softness */
+  opacity: 0.4; /* if i want more “punch”, i raise this */
+  mix-blend-mode: normal;
+  animation: drift 22s ease-in-out infinite; /* slow floating movement */
+}
+
+.orb-one {
+  width: 460px;
+  height: 460px;
+  background: radial-gradient(circle, rgba(154, 194, 255, 0.7), transparent 70%);
+  top: -120px;
+  left: -120px;
+}
+
+.orb-two {
+  width: 520px;
+  height: 520px;
+  background: radial-gradient(circle, rgba(120, 160, 255, 0.5), transparent 70%);
+  bottom: -160px;
+  right: -140px;
+  animation-delay: -4s; /* offset so orbs don’t move in sync */
+}
+
+.orb-three {
+  width: 340px;
+  height: 340px;
+  background: radial-gradient(circle, rgba(200, 220, 255, 0.45), transparent 70%);
+  top: 35%;
+  right: 15%;
+  animation-delay: -8s;
+}
+
+/* film grain overlay (this is that “cinematic” texture) */
+.grain {
+  position: absolute;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23noise)' opacity='0.25'/%3E%3C/svg%3E");
+  opacity: 0.1;
+  mix-blend-mode: soft-light;
+}
+
+/* main app container sizing + spacing */
+.frame {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding: 52px 24px 88px;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* fade in each section on load */
+.frame > * {
+  animation: fadeUp 0.9s ease forwards;
+  opacity: 0;
+}
+
+/* stagger effect so sections don’t pop in all at once */
+.frame > *:nth-child(1) { animation-delay: 0.05s; }
+.frame > *:nth-child(2) { animation-delay: 0.12s; }
+.frame > *:nth-child(3) { animation-delay: 0.18s; }
+.frame > *:nth-child(4) { animation-delay: 0.24s; }
+.frame > *:nth-child(5) { animation-delay: 0.3s; }
+.frame > *:nth-child(6) { animation-delay: 0.36s; }
+
+/* header layout */
+.hero {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+/* little uppercase label under the main title */
+.eyebrow {
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  color: var(--accent);
+  margin-bottom: 12px;
+}
+
+/* main app title */
+h1 {
+  font-family: "Unbounded", sans-serif;
+  font-size: clamp(2.1rem, 4vw, 3.8rem);
+  line-height: 1.05;
+  letter-spacing: -0.02em;
+}
+
+/* subtext under the title */
+.lead {
+  max-width: 520px;
+  color: var(--text-muted);
+  font-size: 1.05rem;
+}
+
+/* top meta cards grid */
+.meta {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 16px;
+}
+
+/* meta card styling (hover lifts slightly) */
+.meta-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--glass);
+  border: 1px solid var(--edge);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(16px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.meta-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow);
+}
+
+.meta-label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-soft);
+}
+
+.meta-value {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+/* search row layout */
+.search-panel {
+  display: grid;
+  grid-template-columns: 1fr auto auto; /* input takes the big space, buttons sit beside */
+  gap: 16px;
+  align-items: center;
+}
+
+/* main search bar look */
+.search {
+  display: flex;
+  gap: 12px;
+  background: var(--panel);
+  padding: 12px;
+  border-radius: 18px;
+  border: 1px solid var(--panel-border);
+  backdrop-filter: blur(16px);
+  box-shadow: inset 0 0 0 1px rgba(124, 248, 255, 0.04);
+  transition: border 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* subtle highlight when typing */
+.search:focus-within {
+  border-color: var(--panel-focus);
+  box-shadow: 0 0 0 3px rgba(124, 248, 255, 0.12);
+}
+
+.search input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 1rem;
+  padding: 8px 12px;
+  outline: none;
+}
+
+.search input::placeholder {
+  color: var(--input-placeholder);
+}
+
+/* scan button */
+.search button {
+  border: none;
+  padding: 10px 18px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: var(--ink);
+  font-weight: 600;
+  cursor: pointer;
+  box-shadow: 0 10px 24px rgba(85, 116, 190, 0.25);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.search button:hover {
+  transform: translateY(-1px) scale(1.02);
+}
+
+/* °C / °F buttons */
+.unit-toggle {
+  display: flex;
+  gap: 8px;
+}
+
+.unit-toggle button {
+  border: 1px solid var(--chip-border);
+  background: var(--chip);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border 0.2s ease;
+}
+
+.unit-toggle button:hover {
+  transform: translateY(-2px);
+}
+
+/* active unit styling */
+.unit-toggle button.active {
+  background: linear-gradient(135deg, #eef4ff, #dbe7ff);
+  color: #1a2a52;
+  border-color: transparent;
+}
+
+/* theme toggle button */
+.theme-toggle {
+  border: 1px solid var(--chip-border);
+  background: var(--chip);
+  color: var(--text);
+  padding: 10px 14px;
+  border-radius: 14px;
+  cursor: pointer;
+  transition: transform 0.2s ease, border 0.2s ease;
+}
+
+.theme-toggle:hover {
+  transform: translateY(-2px);
+}
+
+/* status line under the search row */
+.status {
+  grid-column: 1 / -1; /* makes it span full width */
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-top: -4px;
+}
+
+/* grid holding the “Now” and “Sky Mood” cards */
+.now-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+/* base card look (used all over) */
+.card {
+  padding: 24px;
+  border-radius: 24px;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  box-shadow: var(--shadow-soft);
+  backdrop-filter: blur(18px);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: var(--shadow);
+}
+
+/* small section label text */
+.section-title {
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.3em;
+  color: rgba(124, 248, 255, 0.8);
+  margin-bottom: 12px;
+}
+
+.now h2 {
+  font-size: 1.8rem;
+  margin-bottom: 6px;
+}
+
+.summary {
+  color: var(--text-muted);
+  margin-bottom: 18px;
+}
+
+/* temp line: big number + unit beside it */
+.temp-wrap {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.temp {
+  font-size: 3.8rem;
+  font-weight: 700;
+  font-family: "Unbounded", sans-serif;
+  text-shadow: 0 8px 24px rgba(30, 60, 120, 0.15);
+}
+
+/* 2x2 stats area under temp */
+.now-stats {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(140px, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+
+/* little label above each stat */
+.label {
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2em;
+  color: var(--text-faint);
+}
+
+.value {
+  font-size: 1.1rem;
+  margin-top: 6px;
+}
+
+/* “Sky Mood” card layout */
+.spotlight {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* mood badge itself */
+.mood {
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  padding: 14px 16px;
+  border-radius: 18px;
+  background: var(--mood-bg);
+  border: 1px solid var(--mood-border);
+}
+
+/* the icon text (SUN/CLD/etc) */
+.mood span {
+  font-size: 1rem;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  padding: 8px 10px;
+  border-radius: 12px;
+  background: var(--highlight);
+  color: var(--text);
+}
+
+/* sunrise/sunset row */
+.sunline {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 12px;
+}
+
+/* canvas sizing */
+#sparkline {
+  width: 100%;
+  height: 120px;
+}
+
+/* section headers for forecast/hourly */
+.section-head h3 {
+  font-size: 1.4rem;
+  margin-bottom: 6px;
+}
+
+.section-head p {
+  color: var(--text-soft);
+}
+
+/* 5-day grid */
+.forecast-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 16px;
+}
+
+/* each forecast card */
+.forecast-card {
+  padding: 16px 18px;
+  border-radius: 18px;
+  background: var(--card-muted);
+  border: 1px solid var(--card-border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  box-shadow: var(--shadow-soft);
+
+  /* pop-in animation (delay is set in JS using --delay) */
+  animation: floatIn 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(8px);
+  animation-delay: var(--delay, 0s);
+}
+
+.forecast-card:hover {
+  transform: translateY(-4px);
+  transition: transform 0.2s ease;
+}
+
+.forecast-card h4 {
+  font-size: 1rem;
+}
+
+/* rows inside forecast card (high/low/precip) */
+.forecast-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.95rem;
+}
+
+/* hourly grid */
+.hourly-grid {
+  margin-top: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+}
+
+/* each hour card */
+.hour-card {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: var(--chip);
+  border: 1px solid var(--chip-border);
+  box-shadow: var(--shadow-soft);
+
+  /* same entrance animation idea as forecast cards */
+  animation: floatIn 0.6s ease forwards;
+  opacity: 0;
+  transform: translateY(8px);
+  animation-delay: var(--delay, 0s);
+}
+
+.hour-card:hover {
+  transform: translateY(-3px);
+  transition: transform 0.2s ease;
+}
+
+.hour-card p {
+  font-size: 0.9rem;
+}
+
+/* footer styling */
+.footnote {
+  text-align: center;
+  color: var(--text-soft);
+}
+
+/* orb animation */
+@keyframes drift {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    transform: translate3d(30px, -20px, 0) scale(1.06);
+  }
+}
+
+/* page load fade up */
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* forecast/hour cards pop in */
+@keyframes floatIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* accessibility: if user prefers reduced motion, remove animations */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* tablet-ish breakpoint: stack the search row */
+@media (max-width: 900px) {
+  .search-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .unit-toggle {
+    justify-content: flex-start;
+  }
+}
+
+/* phone breakpoint: tighter padding + smaller temp text */
+@media (max-width: 640px) {
+  .frame {
+    padding: 32px 18px 64px;
+  }
+
+  .temp {
+    font-size: 3rem;
+  }
+}

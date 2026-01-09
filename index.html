@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <!-- makes the layout scale properly on phones (without this, mobile zoom gets weird) -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- title shown on the browser tab -->
+  <title>WeatherIQ Weather</title>
+  <!-- main stylesheet for the entire UI -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+
+<body>
+  <!-- background layer (purely visual). i keep it separate so it never messes with layout -->
+  <div class="sky">
+    <!-- these orbs are just glow blobs; if i want a different vibe i tweak them in CSS -->
+    <div class="orb orb-one"></div>
+    <div class="orb orb-two"></div>
+    <div class="orb orb-three"></div>
+    <!-- film grain overlay to make it feel less “flat” -->
+    <div class="grain"></div>
+  </div>
+
+  <!-- main page wrapper (everything inside is the actual app) -->
+  <main class="frame">
+    <header class="hero">
+      <div>
+        <!-- app name / branding -->
+        <h1>WeatherIQ</h1>
+        <p class="eyebrow">A Simple Weather App.</p>
+        <!-- short description under the title -->
+        <p class="lead">Search any place, track the now, and scroll through a cinematic five-day forecast.</p>
+      </div>
+
+      <!-- top meta cards (quick info). these get filled by JS -->
+      <div class="meta">
+        <div class="meta-card">
+          <p class="meta-label">Local Time</p>
+          <p id="localTime" class="meta-value">--:--</p>
+        </div>
+
+        <div class="meta-card">
+          <p class="meta-label">Elevation</p>
+          <p id="elevation" class="meta-value">--</p>
+        </div>
+
+        <div class="meta-card">
+          <p class="meta-label">Coordinates</p>
+          <p id="coords" class="meta-value">--</p>
+        </div>
+      </div>
+    </header>
+
+    <!-- search + controls row -->
+    <section class="search-panel">
+      <!-- form so pressing Enter works naturally -->
+      <form id="searchForm" class="search">
+        <!-- user types the location here -->
+        <input
+          id="locationInput"
+          name="location"
+          type="search"
+          placeholder="Search city, coast, mountain..."
+          autocomplete="on"
+          required
+        />
+        <!-- submit triggers the fetch in app.js -->
+        <button type="submit">Scan Skies</button>
+      </form>
+
+      <!-- temperature unit toggle (JS swaps values + updates the UI) -->
+      <div class="unit-toggle">
+        <button type="button" data-unit="c" class="active">°C</button>
+        <button type="button" data-unit="f">°F</button>
+      </div>
+
+      <!-- light/dark mode toggle (CSS uses data-theme on body) -->
+      <button type="button" id="themeToggle" class="theme-toggle">Light mode</button>
+
+      <!-- status text (loading, errors, success message). JS updates this -->
+      <p id="status" class="status">Ready for lift-off.</p>
+    </section>
+
+    <!-- “Now” section -->
+    <section class="now-grid">
+      <article class="card now">
+        <div>
+          <p class="section-title">Now</p>
+          <!-- location name goes here -->
+          <h2 id="place">--</h2>
+          <!-- short summary / weather code display -->
+          <p id="summary" class="summary">--</p>
+        </div>
+
+        <!-- big temperature display -->
+        <div class="temp-wrap">
+          <span id="temp" class="temp">--</span>
+          <span id="tempUnit">°C</span>
+        </div>
+
+        <!-- smaller stats under the main temp -->
+        <div class="now-stats">
+          <div>
+            <p class="label">Feels like</p>
+            <p id="feelsLike" class="value">--</p>
+          </div>
+          <div>
+            <p class="label">Humidity</p>
+            <p id="humidity" class="value">--</p>
+          </div>
+          <div>
+            <p class="label">Wind</p>
+            <p id="wind" class="value">--</p>
+          </div>
+          <div>
+            <p class="label">Precip</p>
+            <p id="precip" class="value">--</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- “Sky Mood” / extra details card -->
+      <article class="card spotlight">
+        <p class="section-title">Sky Mood</p>
+
+        <!-- mood badge. icon + label are filled by JS -->
+        <div class="mood" id="moodBadge">
+          <span id="moodIcon">SUN</span>
+          <div>
+            <p id="moodTitle">--</p>
+            <p id="moodDetail">--</p>
+          </div>
+        </div>
+
+        <!-- sunrise + sunset times (daily data) -->
+        <div class="sunline">
+          <div>
+            <p class="label">Sunrise</p>
+            <p id="sunrise" class="value">--</p>
+          </div>
+          <div>
+            <p class="label">Sunset</p>
+            <p id="sunset" class="value">--</p>
+          </div>
+        </div>
+
+        <!-- canvas trend line for next 12 hours (purely visual) -->
+        <canvas id="sparkline" width="420" height="120" aria-hidden="true"></canvas>
+      </article>
+    </section>
+
+    <!-- 5-day forecast section -->
+    <section class="forecast">
+      <div class="section-head">
+        <h3>5-Day Forecast</h3>
+        <p>High/low temperatures, precipitation chances, and sky code.</p>
+      </div>
+
+      <!-- JS generates forecast cards into this grid -->
+      <div id="forecastGrid" class="forecast-grid"></div>
+    </section>
+
+    <!-- hourly forecast section -->
+    <section class="hourly">
+      <div class="section-head">
+        <h3>Next 12 Hours</h3>
+        <p>Plan your moves with an hour-by-hour lineup.</p>
+      </div>
+
+      <!-- JS generates hourly cards into this grid -->
+      <div id="hourlyGrid" class="hourly-grid"></div>
+    </section>
+
+    <footer class="footnote">
+      <!-- copyright + credit line -->
+      <p> © <span id="year"></span> Harkunwar Singh. Weather data provided by Open-Meteo.</p>
+
+      <!-- i set the year with JS so i never have to update it manually -->
+      <script>
+        document.getElementById("year").textContent = new Date().getFullYear();
+      </script>
+    </footer>
+  </main>
+
+  <!-- app logic lives here (fetching + UI updates). keeping it at the bottom so DOM exists first -->
+  <script src="app.js"></script>
+</body>
+</html>
