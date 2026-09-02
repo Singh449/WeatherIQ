@@ -11,7 +11,7 @@ Built with **HTML + CSS + Vanilla JavaScript**, powered by **Open-Meteo**.
 ---
 
 ## Live Preview
-> If you deploy it (Netlify / GitHub Pages), paste the link here.
+https://singh449.github.io/WeatherIQ/
 
 ---
 
